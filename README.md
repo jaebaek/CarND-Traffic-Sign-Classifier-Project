@@ -54,8 +54,8 @@ Calculating the number of unique classes is done by `set` built-in python data s
 
 #### 2. Include an exploratory visualization of the dataset.
 
-Here is an exploratory visualization of the data set. It is a bar chart showing how the number of each
-traffic sign class is distributed.
+Here is an exploratory visualization of the training data set. It is a bar chart showing how each traffic
+sign class is distributed in probability.
 
 ![alt text][image1]
 
@@ -63,59 +63,110 @@ traffic sign class is distributed.
 
 #### 1. Describe how you preprocessed the image data. What techniques were chosen and why did you choose these techniques? Consider including images showing the output of each preprocessing technique. Pre-processing refers to techniques such as converting to grayscale, normalization, etc. (OPTIONAL: As described in the "Stand Out Suggestions" part of the rubric, if you generated additional data for training, describe why you decided to generate additional data, how you generated the data, and provide example images of the additional data. Then describe the characteristics of the augmented training set like number of images in the set, number of images for each class, etc.)
 
-As a first step, I decided to convert the images to grayscale because ...
+I tested three preprocessing techniques:
+- Grayscale and normalization based on (pixel - 128) / 128.
+- Normalization based on (pixel - 128) / 128.
+- Normalization based on (pixel - 128) / (3 * 128).
 
-Here is an example of a traffic sign image before and after grayscaling.
+I first tried the preprocessing technique given by the project description (i.e.,
+grayscale and normalization based on (pixel - 128) / 128) and checked the performance
+(i.e., accuracy) while changing parameters of CNN (e.g., number of neuron, initial
+values of weights and biases and so on). However, it showed 93% accuracy as its
+best the result for the test set (by avoiding overfitting using the dropout).
 
-![alt text][image2]
+I considered what was the problem and realized the color information is also used
+when people classify traffic signs. I tried the same preprocessing but without the
+grayscale. It results in 95 - 96% accuracy as its best.
 
-As a last step, I normalized the image data because ...
-
-I decided to generate additional data because ... 
-
-To add more data to the the data set, I used the following techniques because ... 
-
-Here is an example of an original image and an augmented image:
-
-![alt text][image3]
-
-The difference between the original data set and the augmented data set is the following ... 
+I thought about how to improve it more and worried about the normalization. My theory
+was that just removing the grayscale would have impact on the normalization because
+the effect of grayscale is not only the change of the color but also reduction of each
+pixel value as 1/3. I tested the normalization based on (pixel - 128) / (3 * 128).
+It results in 95 - 96% accuracy as its best, which means my theory is not correct.
+(I observed this normalization makes the learning slower.)
 
 
 #### 2. Describe what your final model architecture looks like including model type, layers, layer sizes, connectivity, etc.) Consider including a diagram and/or table describing the final model.
+
+I started from the skeleton code of LeNet given by this class as my first model.
+I tried to change the model (e.g., the number of parameters, more layers, dropout).
+I realized the dropout is the critical factor that improves the learning performance
+a lot (i.e., avoidance of the overfitting).
+
+Another important factor is the initialization of parameters. I used the normal
+distribution to initialize the weights and made biases as zeros.
+For the normal distribution, I tried various standard deviations (I used 0 mean
+because I thought it must be the same with the preprocessing normalization mean).
+I observed that the small standard deviations makes the learning slower and
+the large standard deviations makes the learning not converged (e.g., stay in 53%
+accuracy). I chose 0.075 as the standard deviation based on trials and errors.
 
 My final model consisted of the following layers:
 
 | Layer         		|     Description	        					| 
 |:---------------------:|:---------------------------------------------:| 
 | Input         		| 32x32x3 RGB image   							| 
-| Convolution 3x3     	| 1x1 stride, same padding, outputs 32x32x64 	|
+| Convolution 5x5     	| 1x1 stride, valid padding, outputs 28x28x12 	|
 | RELU					|												|
-| Max pooling	      	| 2x2 stride,  outputs 16x16x64 				|
-| Convolution 3x3	    | etc.      									|
-| Fully connected		| etc.        									|
-| Softmax				| etc.        									|
-|						|												|
-|						|												|
+| Dropout				| keep\_prob = 0.8 for training, 1 for testing	|
+| Max pooling	      	| 2x2 stride,  outputs 14x14x12 				|
+| Convolution 5x5     	| 1x1 stride, valid padding, outputs 10x10x24 	|
+| RELU					|												|
+| Dropout				| keep\_prob = 0.7 for training, 1 for testing	|
+| Max pooling	      	| 2x2 stride,  outputs 5x5x24                   |
+| Flatten		        | 600x600 weights and 600 biases, outputs 600	|
+| Fully connected       | 600x150 weights and 150 biases, outputs 150	|
+| RELU					|												|
+| Dropout				| keep\_prob = 0.5 for training, 1 for testing	|
+| Fully connected       | 150x84 weights and 84 biases, outputs 84	    |
+| RELU					|												|
+| Dropout				| keep\_prob = 0.5 for training, 1 for testing	|
+| Fully connected       | 84x43 weights and 43 biases, outputs 43	    |
+| Softmax				| 43 logits        								|
  
+I also tested many keep\_prob for each dropout. For the convolution layers,
+small dropout probability was better (e.g., 0.7 - 1). For the fully connected
+layers, bigger dropout probability was better (e.g., 0.5)
 
 
 #### 3. Describe how you trained your model. The discussion can include the type of optimizer, the batch size, number of epochs and any hyperparameters such as learning rate.
 
-To train the model, I used an ....
+To train the model, I used a cross entropy as the loss function, 50 as the batch size,
+25 as the number of epochs, and 0.0005 as the learning rate.
+As explained in this class, there was a trade-off between the learning time and the
+learning performance. For small learning rates (e.g., 0.0005 - 0.001) and small
+batch size (e.g., 50 - 100) and enough numbers of epochs (e.g., 20 - 100), the result
+was similiar (i.e., 95 - 96%).
 
 #### 4. Describe the approach taken for finding a solution and getting the validation set accuracy to be at least 0.93. Include in the discussion the results on the training, validation and test sets and where in the code these were calculated. Your approach may have been an iterative process, in which case, outline the steps you took to get to the final solution and why you chose those steps. Perhaps your solution involved an already well known implementation or architecture. In this case, discuss why you think the architecture is suitable for the current problem.
 
 My final model results were:
-* training set accuracy of ?
-* validation set accuracy of ? 
-* test set accuracy of ?
+* training set accuracy of 0.997.
+* validation set accuracy of 0.974.
+* test set accuracy of 0.957.
 
 If an iterative approach was chosen:
 * What was the first architecture that was tried and why was it chosen?
+
+Grayscale and normalization based on (pixel - 128) / 128 for preprocessing
+and the initail LeNet given by this class.
+
 * What were some problems with the initial architecture?
+
+Smaller information because of grayscale and overfitting.
+
 * How was the architecture adjusted and why was it adjusted? Typical adjustments could include choosing a different model architecture, adding or taking away layers (pooling, dropout, convolution, etc), using an activation function or changing the activation function. One common justification for adjusting an architecture would be due to overfitting or underfitting. A high accuracy on the training set but low accuracy on the validation set indicates over fitting; a low accuracy on both sets indicates under fitting.
+
+The color information is also used when people classify traffic signs.
+Thus, I only adopted the normalization as the preprocessing.
+I also added dropout to avoid the overfitting.
+In addition, various parameters (e.g., the number of neurons, the standard deviations,
+the learning rates) were tested.
+
 * Which parameters were tuned? How were they adjusted and why?
+
+Increased the number of filters for convolution layers.
+
 * What are some of the important design choices and why were they chosen? For example, why might a convolution layer work well with this problem? How might a dropout layer help with creating a successful model?
 
 If a well known architecture was chosen:
