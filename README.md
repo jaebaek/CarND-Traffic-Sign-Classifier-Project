@@ -20,13 +20,16 @@ The goals / steps of this project are the following:
 [//]: # (Image References)
 
 [image1]: ./img/statics.png "Visualization"
-[image2]: ./examples/grayscale.jpg "Grayscaling"
-[image3]: ./examples/random_noise.jpg "Random Noise"
-[image4]: ./examples/placeholder.png "Traffic Sign 1"
-[image5]: ./examples/placeholder.png "Traffic Sign 2"
-[image6]: ./examples/placeholder.png "Traffic Sign 3"
-[image7]: ./examples/placeholder.png "Traffic Sign 4"
-[image8]: ./examples/placeholder.png "Traffic Sign 5"
+[image2]: ./img/real_sign_0.png "Traffic Sign 1"
+[image3]: ./img/real_sign_1.png "Traffic Sign 2"
+[image4]: ./img/real_sign_2.png "Traffic Sign 3"
+[image5]: ./img/real_sign_3.png "Traffic Sign 4"
+[image6]: ./img/real_sign_4.png "Traffic Sign 5"
+[image7]: ./img/real_sign_5.png "Traffic Sign 6"
+[image8]: ./img/real_sign_6.png "Traffic Sign 7"
+[image9]: ./img/real_sign_7.png "Traffic Sign 8"
+[image10]: ./img/real_sign_8.png "Traffic Sign 9"
+[image11]: ./img/real_sign_9.png "Traffic Sign 10"
 
 ## Rubric Points
 ### Here I will consider the [rubric points](https://review.udacity.com/#!/rubrics/481/view) individually and describe how I addressed each point in my implementation.  
@@ -148,43 +151,73 @@ My final model results were:
 If an iterative approach was chosen:
 * What was the first architecture that was tried and why was it chosen?
 
-Grayscale and normalization based on (pixel - 128) / 128 for preprocessing
-and the initail LeNet given by this class.
+    * Grayscale and normalization based on (pixel - 128) / 128 for preprocessing
+    and the initail LeNet (given by this class) for the learning model.
 
 * What were some problems with the initial architecture?
 
-Smaller information because of grayscale and overfitting.
+    * Smaller information because of grayscale and overfitting.
 
 * How was the architecture adjusted and why was it adjusted? Typical adjustments could include choosing a different model architecture, adding or taking away layers (pooling, dropout, convolution, etc), using an activation function or changing the activation function. One common justification for adjusting an architecture would be due to overfitting or underfitting. A high accuracy on the training set but low accuracy on the validation set indicates over fitting; a low accuracy on both sets indicates under fitting.
 
-The color information is also used when people classify traffic signs.
-Thus, I only adopted the normalization as the preprocessing.
-I also added dropout to avoid the overfitting.
-In addition, various parameters (e.g., the number of neurons, the standard deviations,
-the learning rates) were tested.
+    * The color information is also used when people classify traffic signs.
+    Thus, I dropped the grayscale and adopted only the normalization as the preprocessing.
+    I also added dropout to avoid the overfitting.
+    In addition, various parameters (e.g., the number of neurons, the standard deviations,
+    the learning rates) were tested to find the best parameters based on trials and errors.
 
 * Which parameters were tuned? How were they adjusted and why?
 
-Increased the number of filters for convolution layers.
+    * The number of filters for convolution layers (and the total number of neurons),
+    the standard deviation (of the normal distribution to set up the initial weights
+    and biases), the learning rate, the keep probabilities of dropouts.
+
+    * I changed ranges of those numbers by doubling them and dividing by 1/2.
+    If the accuracy is not changed that much in a certain range, I tried to increase/decrease
+    small numbers linearly. I found the best number by those experiments.
 
 * What are some of the important design choices and why were they chosen? For example, why might a convolution layer work well with this problem? How might a dropout layer help with creating a successful model?
 
+    * When I first tested the initial LeNet with grayscale, it was very hard to achieve
+    the accuracy higher than 93% and 90 - 92% was the best accuracy. I dropped the
+    grayscale based on the intuition that the color information is used
+    when people classify traffic signs. It improves the accuracy and I can get 93 - 94%
+    accuracy.
+
+    * I observed that the gap between the accuracy against training data and the one for
+    validation data is approximately 7% and it is not changed by epochs. I realized it is
+    overfitted and I adopted dropouts to avoid the overfitting. As a result, The accuracy
+    gap becomes smaller (e.g., 3%) and the accuracy against the test data becomes more than
+    95%.
+
 If a well known architecture was chosen:
 * What architecture was chosen?
+    * LeNet and dropouts.
 * Why did you believe it would be relevant to the traffic sign application?
+    * LeNet is a convolutional neural network for the image classification.
+    The CNN is the state-of-the-art in this field. Dropout is known as a method
+    to effectively reduce overfitting.
 * How does the final model's accuracy on the training, validation and test set provide evidence that the model is working well?
+    * The accuracy of validation and test set is high (e.g., more than 95%) and the
+    gap between the accuracy of validation (or test) set and the accuracy of training set
+    is small, which means it is overfitted a little bit.
  
 
 ### Test a Model on New Images
 
 #### 1. Choose five German traffic signs found on the web and provide them in the report. For each image, discuss what quality or qualities might be difficult to classify.
 
-Here are five German traffic signs that I found on the web:
+Here are ten German traffic signs that I found on the web:
 
-![alt text][image4] ![alt text][image5] ![alt text][image6] 
-![alt text][image7] ![alt text][image8]
+![alt text][image2] ![alt text][image3]
+![alt text][image4] ![alt text][image5]
+![alt text][image6] ![alt text][image7]
+![alt text][image8] ![alt text][image9]
+![alt text][image10] ![alt text][image11]
 
-The first image might be difficult to classify because ...
+These images might be difficult to classify because their sizes are different
+(between each other). It means we must convert them to 32x32x3 and some of them
+might lose important pixels because of the conversion.
 
 #### 2. Discuss the model's predictions on these new traffic signs and compare the results to predicting on the test set. At a minimum, discuss what the predictions were, the accuracy on these new predictions, and compare the accuracy to the accuracy on the test set (OPTIONAL: Discuss the results in more detail as described in the "Stand Out Suggestions" part of the rubric).
 
@@ -192,33 +225,72 @@ Here are the results of the prediction:
 
 | Image			        |     Prediction	        					| 
 |:---------------------:|:---------------------------------------------:| 
-| Stop Sign      		| Stop sign   									| 
-| U-turn     			| U-turn 										|
-| Yield					| Yield											|
-| 100 km/h	      		| Bumpy Road					 				|
-| Slippery Road			| Slippery Road      							|
+| Vehicles over 3.5 metric tons prohibited | Vehicles over 3.5 metric tons prohibited | 
+| Speed limit (30km/h) | Speed limit (30km/h) |
+| Keep right | Keep right |
+| Turn right ahead | Turn right ahead |
+| Right-of-way at the next intersection | Right-of-way at the next intersection |
+| Keep right | Keep right |
+| General caution | General caution |
+| Priority road | Priority road |
+| Road work | Road work |
+| Ahead only | Ahead only |
 
 
-The model was able to correctly guess 4 of the 5 traffic signs, which gives an accuracy of 80%. This compares favorably to the accuracy on the test set of ...
+The model was able to correctly guess 10 of the 10 traffic signs,
+which gives an accuracy of 100%. This compares favorably to the accuracy on the test set of 95%.
 
 #### 3. Describe how certain the model is when predicting on each of the five new images by looking at the softmax probabilities for each prediction. Provide the top 5 softmax probabilities for each image along with the sign type of each probability. (OPTIONAL: as described in the "Stand Out Suggestions" part of the rubric, visualizations can also be provided such as bar charts)
 
-The code for making predictions on my final model is located in the 11th cell of the Ipython notebook.
+The code for making predictions on my final model is located in the 10th cell of the Ipython notebook.
 
-For the first image, the model is relatively sure that this is a stop sign (probability of 0.6), and the image does contain a stop sign. The top five soft max probabilities were
+For those ten images, the model is almost 100% sure that each of them is
+each predicted sign (all probabilities are higher than 0.999998).
+The top five soft max probabilities for first five of them were
 
 | Probability         	|     Prediction	        					| 
 |:---------------------:|:---------------------------------------------:| 
-| .60         			| Stop sign   									| 
-| .20     				| U-turn 										|
-| .05					| Yield											|
-| .04	      			| Bumpy Road					 				|
-| .01				    | Slippery Road      							|
+| 1.0         			| Vehicles over 3.5 metric tons prohibited | 
+| 7.1080641e-10 |  No passing |
+| 1.0109183e-10	| Speed limit (100km/h) |
+| 4.6894749e-11 | Speed limit (60km/h) |
+| 1.4506763e-12 | End of no passing by vehicles over 3.5 metric tons |
 
+| Probability         	|     Prediction	        					| 
+|:---------------------:|:---------------------------------------------:| 
+| 0.99999928 | Speed limit (30km/h) | 
+| 7.4919762e-07 | Speed limit (70km/h) |
+| 2.9745665e-08	| Speed limit (50km/h) |
+| 8.3901499e-09 | Speed limit (20km/h) |
+| 1.3125528e-11 | Speed limit (80km/h) |
 
-For the second image ... 
+| Probability         	|     Prediction	        					| 
+|:---------------------:|:---------------------------------------------:| 
+| 1.0         			| Keep right | 
+| 1.3764925e-29 | Roundabout mandatory |
+| 3.8931053e-30 | Go straight or left |
+| 2.4156224e-32 | Go straight or right |
+| 6.5857299e-33 | Dangerous curve to the right |
+
+| Probability         	|     Prediction	        					| 
+|:---------------------:|:---------------------------------------------:| 
+| 1.0 | Turn right ahead |
+| 3.8748436e-08 | Turn left ahead |
+| 5.0187237e-09| Ahead only|
+|2.6838642e-10| No vehicles|
+|1.6287434e-10| Keep left|
+
+| Probability         	|     Prediction	        					| 
+|:---------------------:|:---------------------------------------------:| 
+|0.99999893| Right-of-way at the next intersection|
+|7.6879104e-07| Double curve|
+|3.4780922e-07| Beware of ice/snow|
+|1.8348071e-09| Pedestrians|
+|9.99246e-12| Children crossing|
+
 
 ### (Optional) Visualizing the Neural Network (See Step 4 of the Ipython notebook for more details)
 #### 1. Discuss the visual output of your trained network's feature maps. What characteristics did the neural network use to make classifications?
 
+I did not try it.
 
